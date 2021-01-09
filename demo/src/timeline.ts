@@ -1,8 +1,8 @@
-import { interval, merge, Observable, Subject } from 'rxjs';
-import { mapTo, scan, switchMap, takeUntil } from 'rxjs/operators';
+import { interval, merge, Observable, ReplaySubject, Subject } from 'rxjs';
+import { mapTo, scan, switchMap, takeUntil, tap } from 'rxjs/operators';
 
 export class Timeline {
-  public start$ = new Subject();
+  public start$ = new ReplaySubject(1);
   public reset$ = new Subject();
   public stop$ = new Subject();
   public time$: Observable<number>
@@ -14,7 +14,7 @@ export class Timeline {
         switchMap(() =>
           interval(500).pipe(takeUntil(this.stop$))
         ),
-        mapTo(1)
+        mapTo(1),
       ),
       this.reset$.pipe(mapTo(0))
     ).pipe(
