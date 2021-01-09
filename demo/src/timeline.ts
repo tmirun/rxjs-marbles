@@ -2,6 +2,7 @@ import { interval, merge, Observable, ReplaySubject, Subject } from 'rxjs';
 import { mapTo, scan, switchMap, takeUntil, tap } from 'rxjs/operators';
 
 export class Timeline {
+  public period = 500; // millisecond
   public start$ = new ReplaySubject(1);
   public reset$ = new Subject();
   public stop$ = new Subject();
@@ -12,7 +13,7 @@ export class Timeline {
     this.time$ = merge(
       this.start$.pipe(
         switchMap(() =>
-          interval(500).pipe(takeUntil(this.stop$))
+          interval(this.period).pipe(takeUntil(this.stop$))
         ),
         mapTo(1),
       ),
