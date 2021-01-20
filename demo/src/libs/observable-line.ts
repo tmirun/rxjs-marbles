@@ -1,25 +1,33 @@
 import { G, Rect, Svg } from '@svgdotjs/svg.js';
 import { Observable, Subscription } from 'rxjs';
 import { Timeline } from './timeline';
-import { throttle } from 'rxjs/operators';
+import { RxBlockGroup } from './rx-block-group';
 
-export class ObservableLine {
-  public timeCounter = 0;
-  public group: G;
+interface Options {
+  x: number,
+  y: number,
+  id?: string
+}
+
+export class ObservableLine extends RxBlockGroup {
+  public static height = 60;
   private axis: Rect;
+
+  public timeCounter = 0;
   public lineWidth = 2;
   public dotSize = 30;
-  get dotRadius(){return this.dotSize / 2};
   public subscription: Subscription | undefined;
   public timelineSubscription: Subscription | undefined;
   public timeSpace = 1;
   public completeNextTime = false;
 
-  private height = 60;
-  private get middleY () { return this.height / 2}
+  get dotRadius(){return this.dotSize / 2};
+  private get middleY () { return ObservableLine.height / 2}
 
-  constructor(svg: Svg, observable$: Observable<any>, timeline: Timeline, startX = 0, startY = 0, id: string) {
-    this.group = svg.group();
+  constructor(draw: Svg | G, observable$: Observable<any>, timeline: Timeline, {x = 0, y = 0}: Options ) {
+    super(draw);
+
+    this.group = draw.group().addClass('observable-line');
     this.axis = this.group.rect(0, this.lineWidth).center(0, this.middleY);
 
     this.timelineSubscription = timeline.time$.subscribe(() => {
@@ -27,8 +35,8 @@ export class ObservableLine {
       this.axis.width(this.getTimeSpace());
     })
 
+    // subscribe to observable
     this.subscription = observable$
-      .pipe(throttle( () => timeline.time$))
       .subscribe({
         next: (value) => {
           this._drawDot(value)
@@ -40,10 +48,7 @@ export class ObservableLine {
         complete: () => this.complete
       });
 
-    this.group.transform({
-      translateX: startX,
-      translateY: startY
-    })
+    this.group.transform({ translateX: x, translateY: y})
   }
 
   complete() {
@@ -55,7 +60,7 @@ export class ObservableLine {
     return this.timeCounter * this.timeSpace;
   }
 
-  private _drawDot(value = 'a') {
+  private _drawDot(value = 'n') {
     const dot = this.group.group();
     dot.circle(this.dotSize)
       .center(this.dotRadius, this.dotRadius)
