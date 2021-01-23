@@ -9,10 +9,13 @@ export class ObservableMarble {
   public drawElements: ObservableLine[] & ObservableOperator[] = [];
   public showAllOperatorMarble = true;
   public title: Text
+  public titleHeight = 20;
+  private _currentY = 0;
 
   constructor(draw: Svg, source$: Observable<any>, timeline: Timeline) {
     this.group = draw.group().addClass('observable-marbles')
     this.title = this.group.text('text')
+    this._currentY += this.titleHeight;
 
     source$.subscribe({
       complete: () => {
@@ -27,18 +30,20 @@ export class ObservableMarble {
       observables = [source$]
     }
 
-    console.log(this.title.bbox());
     observables.forEach((observable: Observable<any>, index) => {
       if(observable.source) {
         const observableOperations = new ObservableOperator(this.group, observable,
-          {x: 0, y: (index * ObservableOperator.height + 20) });
-        this.drawElements.push(observableOperations)
+          timeline, {x: 0, y:  this._currentY });
+        this.drawElements.push(observableOperations);
+
+        this._currentY += ObservableOperator.height;
       }
 
       const observableLine = new ObservableLine(this.group, observable, timeline, {
         x: 0,
-        y: index * ObservableLine.height + 20,
+        y: this._currentY,
       });
+      this._currentY += ObservableLine.height;
 
       this.drawElements.push(observableLine)
     })
@@ -56,20 +61,5 @@ export class ObservableMarble {
     this.drawElements.forEach((observableLine) => {
       observableLine.completeNextTime = true;
     })
-  }
-
-  private calculatePositions() {
-    let result = 0;
-    this.drawElements.forEach((element) => {
-      if(element instanceof ObservableLine) {
-        result += ObservableLine.height
-      }
-
-      if(element instanceof ObservableOperator) {
-        result += ObservableOperator.height
-      }
-    });
-
-    return result;
   }
 }
