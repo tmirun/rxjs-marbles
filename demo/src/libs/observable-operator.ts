@@ -11,17 +11,16 @@ interface Options {
 export class ObservableOperator extends RxBlockGroup {
   public static height = 40;
 
-  constructor(draw: Svg | G, observable$: Observable<any>, timeline: Timeline, { x, y }: Options) {
-    super(draw);
+  constructor(draw: Svg | G, observable$: Observable<any>, timeline: Timeline) {
+    super(draw, 'observable-operator');
 
-    this.group = draw.group().addClass('observable-operator');
     const description = this.getOperatorDescription(observable$);
 
     const text = this.group.text(description);
 
     const rect = this.group
       .rect(text.rbox().width, ObservableOperator.height)
-      .stroke({ color: 'black', width: 3 })
+      .stroke({ color: 'black', width: 1 })
       .fill('transparent');
     text.cy(ObservableOperator.height / 2);
 
@@ -31,8 +30,6 @@ export class ObservableOperator extends RxBlockGroup {
       rect.animate({ duration: timeline.period }).width(width);
       text.animate({ duration: timeline.period }).cx(width / 2);
     });
-
-    this.group.move(x, y);
   }
 
   getOperatorDescription(observable$: Observable<any>) {

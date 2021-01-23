@@ -10,7 +10,7 @@ interface Options {
 }
 
 export class ObservableLine extends RxBlockGroup {
-  public static height = 60;
+  public static height = 80;
   private axis: Rect;
 
   public timeCounter = 0;
@@ -28,15 +28,8 @@ export class ObservableLine extends RxBlockGroup {
     return ObservableLine.height / 2;
   }
 
-  constructor(
-    draw: Svg | G,
-    observable$: Observable<any>,
-    timeline: Timeline,
-    { x = 0, y = 0 }: Options
-  ) {
-    super(draw);
-
-    this.group = draw.group().addClass('observable-line');
+  constructor(draw: Svg | G, observable$: Observable<any>, timeline: Timeline) {
+    super(draw, 'observable-line');
     this.axis = this.group.rect(0, this.lineWidth).center(0, this.middleY);
 
     this.timelineSubscription = timeline.time$.subscribe(() => {
@@ -55,8 +48,6 @@ export class ObservableLine extends RxBlockGroup {
       },
       complete: () => this.complete
     });
-
-    this.group.transform({ translateX: x, translateY: y });
   }
 
   complete() {
@@ -74,14 +65,32 @@ export class ObservableLine extends RxBlockGroup {
       value = '...';
     }
     const dot = this.group.group();
-    dot.circle(this.dotSize).center(this.dotRadius, this.dotRadius).fill('white').stroke('black');
+    const dashLine = dot
+      .line(0, 0, 0, ObservableLine.height)
+      .stroke({ dasharray: '5', color: '#000' });
 
-    dot.text(value.toString()).center(this.dotRadius, this.dotRadius);
+    const circle = dot
+      .circle(0)
+      .center(0, this.middleY)
+      .fill('#fff')
+      .stroke('black')
+      .animate()
+      .size(this.dotSize, this.dotSize);
 
-    dot.transform({
-      translateX: this.getTimeSpace(),
-      translateY: this.middleY - this.dotRadius
-    });
+    const text = dot.text(value.toString()).center(0, this.middleY).attr({ fill: '#000' });
+    // text.animate(500, 'linear').attr({ fill: '#000', 'fill-opacity': 1 });
+    //
+    // const dashLine = dot
+    //   .line(this.dotSize / 2, 0, this.dotSize / 2, ObservableLine.height)
+    //   .stroke('black');
+    //
+    dot
+      .transform({
+        translateX: this.getTimeSpace()
+      })
+      .opacity(0)
+      .animate()
+      .attr({ opacity: 1 });
   }
 
   private _drawCompleteLine() {
