@@ -1,5 +1,5 @@
-import { interval, merge, Observable, ReplaySubject, Subject } from 'rxjs';
-import { mapTo, scan, switchMap, takeUntil, tap } from 'rxjs/operators';
+import { interval, Observable, ReplaySubject, Subject } from 'rxjs';
+import { switchMap, takeUntil, tap } from 'rxjs/operators';
 
 export class Timeline {
   public period = 500; // millisecond
@@ -7,13 +7,13 @@ export class Timeline {
   public stop$ = new Subject();
   public time$: Observable<number>;
   public counter = 0;
+  public timeSpace = 3;
 
   constructor() {
     // ref: https://codepen.io/belfz/pen/WwrBej
     this.time$ = this.start$.pipe(
-      switchMap(() => interval(this.period).pipe(takeUntil(this.stop$))),
-      mapTo(1),
-      scan((acc, n) => (n === 0 ? 0 : acc + n))
+      tap(() => this.counter++),
+      switchMap(() => interval(this.period).pipe(takeUntil(this.stop$)))
     );
   }
 
@@ -23,5 +23,9 @@ export class Timeline {
 
   stop() {
     this.stop$.next();
+  }
+
+  getTimeSpace() {
+    return this.counter * this.timeSpace;
   }
 }
