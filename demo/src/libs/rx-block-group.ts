@@ -26,4 +26,10 @@ export class RxBlockGroup {
     this._y = value;
     this.group.transform({ translateY: this._y });
   }
+
+  xy(x: number, y: number) {
+    this._y = y;
+    this._x = x;
+    this.group.transform({ translateX: this._x, translateY: this._y });
+  }
 }

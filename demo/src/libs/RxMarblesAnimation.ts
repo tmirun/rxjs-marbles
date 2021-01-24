@@ -21,6 +21,8 @@ export class RxMarblesAnimation {
     const observableMarble = new ObservableMarble(this.svg, observable$, this.timeline);
     observableMarble.x = this.padding;
     this.observablesMarbles.push(observableMarble);
+
+    // when detect other subscriber
     observable$.subscribe((value) => {
       if (isObservable(value)) {
         this.subscribe(value);

@@ -2,12 +2,8 @@ import { G, Rect, Svg } from '@svgdotjs/svg.js';
 import { Observable, Subscription } from 'rxjs';
 import { Timeline } from './timeline';
 import { RxBlockGroup } from './rx-block-group';
-
-interface Options {
-  x: number;
-  y: number;
-  id?: string;
-}
+import './colors';
+import { getRandomColor } from './colors';
 
 export class ObservableLine extends RxBlockGroup {
   public static height = 80;
@@ -20,6 +16,7 @@ export class ObservableLine extends RxBlockGroup {
   public timelineSubscription: Subscription | undefined;
   public timeSpace = 3;
   public completeNextTime = false;
+  private color = getRandomColor();
 
   get dotRadius() {
     return this.dotSize / 2;
@@ -73,17 +70,12 @@ export class ObservableLine extends RxBlockGroup {
       .circle(0)
       .center(0, this.middleY)
       .fill('#fff')
-      .stroke('black')
+      .stroke({ color: this.color, width: 4 })
       .animate()
       .size(this.dotSize, this.dotSize);
 
     const text = dot.text(value.toString()).center(0, this.middleY).attr({ fill: '#000' });
-    // text.animate(500, 'linear').attr({ fill: '#000', 'fill-opacity': 1 });
-    //
-    // const dashLine = dot
-    //   .line(this.dotSize / 2, 0, this.dotSize / 2, ObservableLine.height)
-    //   .stroke('black');
-    //
+
     dot
       .transform({
         translateX: this.getTimeSpace()

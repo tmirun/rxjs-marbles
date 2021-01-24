@@ -6,6 +6,8 @@ import { ObservableOperator } from './observable-operator';
 import { RxBlockGroup } from './rx-block-group';
 
 export class ObservableMarble extends RxBlockGroup {
+  static readonly padding = 20;
+
   public drawElements: ObservableLine[] & ObservableOperator[] = [];
   public showAllOperatorMarble = true;
   public title: Text;
@@ -31,16 +33,16 @@ export class ObservableMarble extends RxBlockGroup {
     }
 
     observables.forEach((observable: Observable<any>, index) => {
-      if (observable.source) {
+      if (observable.source && this.showAllOperatorMarble) {
         const observableOperations = new ObservableOperator(this.group, observable, timeline);
-        observableOperations.y = this._currentY;
+        observableOperations.xy(0, this._currentY);
         this.drawElements.push(observableOperations);
 
         this._currentY += ObservableOperator.height;
       }
 
       const observableLine = new ObservableLine(this.group, observable, timeline);
-      observableLine.y = this._currentY;
+      observableLine.xy(ObservableMarble.padding, this._currentY);
       this._currentY += ObservableLine.height;
 
       this.drawElements.push(observableLine);

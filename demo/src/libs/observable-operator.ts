@@ -3,13 +3,9 @@ import { Observable } from 'rxjs';
 import { RxBlockGroup } from './rx-block-group';
 import { Timeline } from './timeline';
 
-interface Options {
-  x: number;
-  y: number;
-}
-
 export class ObservableOperator extends RxBlockGroup {
   public static height = 40;
+  public padding = 20;
 
   constructor(draw: Svg | G, observable$: Observable<any>, timeline: Timeline) {
     super(draw, 'observable-operator');
@@ -19,7 +15,7 @@ export class ObservableOperator extends RxBlockGroup {
     const text = this.group.text(description);
 
     const rect = this.group
-      .rect(text.rbox().width, ObservableOperator.height)
+      .rect(text.rbox().width + this.padding * 2, ObservableOperator.height)
       .stroke({ color: 'black', width: 1 })
       .fill('transparent');
     text.cy(ObservableOperator.height / 2);
@@ -38,8 +34,9 @@ export class ObservableOperator extends RxBlockGroup {
     let result = '';
     const operatorName = observable$.operator?.constructor?.name.replace('Operator', '');
     // @ts-ignore
-    let project = observable$.operator.project.toString();
+    let project = observable$.operator.project;
     if (project) {
+      project = project.toString();
       if (project.length > 10) project = '...';
       return `${operatorName}(${project})`;
     }
