@@ -9,14 +9,13 @@ export class ObservableLine extends RxBlockGroup {
   public static height = 80;
   private axis: Rect;
 
-  public timeCounter = 0;
   public lineWidth = 2;
   public dotSize = 30;
   public subscription: Subscription | undefined;
   public timelineSubscription: Subscription | undefined;
-  public timeSpace = 3;
   public completeNextTime = false;
   private color = getRandomColor();
+  private timeline: Timeline;
 
   get dotRadius() {
     return this.dotSize / 2;
@@ -27,11 +26,15 @@ export class ObservableLine extends RxBlockGroup {
 
   constructor(draw: Svg | G, observable$: Observable<any>, timeline: Timeline) {
     super(draw, 'observable-line');
+    this.timeline = timeline;
     this.axis = this.group.rect(0, this.lineWidth).center(0, this.middleY);
 
     this.timelineSubscription = timeline.time$.subscribe(() => {
-      this.timeCounter++;
-      this.axis.animate({ duration: timeline.period, ease: 'linear' }).width(this.getTimeSpace());
+      this.axis
+        .animate({ duration: timeline.period, ease: 'linear' })
+        .width(timeline.getTimeSpace());
+
+      console.log(timeline.getTimeSpace());
     });
 
     // subscribe to observable
@@ -50,10 +53,6 @@ export class ObservableLine extends RxBlockGroup {
   complete() {
     this._drawCompleteLine();
     this._unsubscribe();
-  }
-
-  getTimeSpace() {
-    return this.timeCounter * this.timeSpace;
   }
 
   private _drawDot(value = 'n') {
@@ -78,7 +77,7 @@ export class ObservableLine extends RxBlockGroup {
 
     dot
       .transform({
-        translateX: this.getTimeSpace()
+        translateX: this.timeline.getTimeSpace()
       })
       .opacity(0)
       .animate()
@@ -86,7 +85,7 @@ export class ObservableLine extends RxBlockGroup {
   }
 
   private _drawCompleteLine() {
-    const x = this.getTimeSpace() + this.dotRadius;
+    const x = this.timeline.getTimeSpace() + this.dotRadius;
     this.group
       .rect(4, this.dotSize + 10)
       .center(x, this.middleY)

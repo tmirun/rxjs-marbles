@@ -7,13 +7,13 @@ export class Timeline {
   public stop$ = new Subject();
   public time$: Observable<number>;
   public counter = 0;
-  public timeSpace = 3;
+  public timeSpace = 2;
 
   constructor() {
     // ref: https://codepen.io/belfz/pen/WwrBej
     this.time$ = this.start$.pipe(
-      tap(() => this.counter++),
-      switchMap(() => interval(this.period).pipe(takeUntil(this.stop$)))
+      switchMap(() => interval(this.period).pipe(takeUntil(this.stop$))),
+      tap(() => this.counter++)
     );
   }
 

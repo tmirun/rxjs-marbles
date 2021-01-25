@@ -7,10 +7,11 @@ export class RxMarblesAnimation {
   public timeline = new Timeline();
   public svg: Svg;
   public observablesMarbles: ObservableMarble[] = [];
-  public padding = 20;
+  public padding = 10;
 
   constructor(svgElement: string) {
     this.svg = SVG().addTo(svgElement).size('auto', 600);
+
     this.timeline.start();
     this.timeline.time$.subscribe(() => {
       this.refreshSvgSize();
@@ -20,6 +21,7 @@ export class RxMarblesAnimation {
   subscribe(observable$: Observable<any>) {
     const observableMarble = new ObservableMarble(this.svg, observable$, this.timeline);
     observableMarble.x = this.padding;
+    observableMarble.y = this.padding;
     this.observablesMarbles.push(observableMarble);
 
     // when detect other subscriber
@@ -31,11 +33,16 @@ export class RxMarblesAnimation {
   }
 
   refreshSvgSize() {
+    let height = 0;
+    let width = 0;
     this.observablesMarbles.forEach((observablesMarble) => {
-      this.svg
-        .animate({ duration: this.timeline.period })
-        .width(observablesMarble.group.width() + this.padding * 2)
-        .height(observablesMarble.group.height() + this.padding * 2);
+      width = Math.max(observablesMarble.group.width() + observablesMarble.x, width);
+      height = Math.max(observablesMarble.group.height(), height);
     });
+
+    this.svg
+      .animate({ duration: this.timeline.period })
+      .width(width + this.padding * 2)
+      .height(height + this.padding * 2);
   }
 }
