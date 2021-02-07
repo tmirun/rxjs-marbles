@@ -1,10 +1,11 @@
 import { G, Svg } from '@svgdotjs/svg.js';
 import tippy from 'tippy.js';
 import { RxAxisType } from './rx-axis';
+import 'tippy.js/dist/tippy.css';
 
 interface Options {
   value: string;
-  height: number;
+  cy: number;
   color: string;
   rxAxisType: RxAxisType;
 }
@@ -14,9 +15,7 @@ export const RX_DOT_RADIUS = RX_DOT_SIZE / 2;
 export const RX_DOT_STROKE = 4;
 export const RX_DOT_RADIUS_OUTER = RX_DOT_RADIUS + RX_DOT_STROKE;
 
-export function drawDot(draw: Svg | G, { value, height, color, rxAxisType }: Options) {
-  const middleY = height / 2;
-  console.log('value', value);
+export function drawDot(draw: Svg | G, { value, cy, color, rxAxisType }: Options) {
   const originalValue = value.toString();
   const text = originalValue.length > 3 ? '...' : originalValue;
 
@@ -26,26 +25,26 @@ export function drawDot(draw: Svg | G, { value, height, color, rxAxisType }: Opt
 
   switch (rxAxisType) {
     case 'start':
-      dashLine.attr({ y1: middleY, y2: height });
+      dashLine.attr({ y1: cy, y2: cy });
       break;
     case 'middle':
-      dashLine.attr({ y1: 0, y2: height });
+      dashLine.attr({ y1: 0, y2: cy });
       break;
     case 'final':
-      dashLine.attr({ y1: 0, y2: middleY });
+      dashLine.attr({ y1: 0, y2: cy });
       break;
   }
 
   const circleGroup = dot.group();
   circleGroup
     .circle(0)
-    .center(0, middleY)
+    .center(0, cy)
     .fill('#fff')
     .stroke({ color: color, width: RX_DOT_STROKE })
     .animate()
     .size(RX_DOT_SIZE, RX_DOT_SIZE);
 
-  circleGroup.text(text).center(0, middleY).attr({ fill: '#000' }).attr({
+  circleGroup.text(text).center(0, cy).attr({ fill: '#000' }).attr({
     style: 'user-select: none; cursor: default; outline: none'
   });
 

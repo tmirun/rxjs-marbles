@@ -2,9 +2,7 @@ import { G, Rect, Svg } from '@svgdotjs/svg.js';
 import { Observable, Subscription } from 'rxjs';
 import { Timeline } from './timeline';
 import { RxBlockGroup } from './rx-block-group';
-import './colors';
-import { getRandomColor } from './colors';
-import 'tippy.js/dist/tippy.css';
+import { COLORS, getRandomColor } from './colors';
 import { drawDot, RX_DOT_RADIUS, RX_DOT_RADIUS_OUTER, RX_DOT_SIZE } from './rx-dot';
 
 export type RxAxisType = 'start' | 'final' | 'none' | 'middle';
@@ -19,7 +17,7 @@ export class RxAxis extends RxBlockGroup {
   public completeNextTime = false;
   private color = getRandomColor();
   private timeline: Timeline;
-  private startTimeCountAt: number;
+  private readonly startTimeCountAt: number;
 
   private get middleY() {
     return RxAxis.height / 2;
@@ -48,7 +46,7 @@ export class RxAxis extends RxBlockGroup {
         drawDot(this.group, {
           value,
           color: this.color,
-          height: RxAxis.height,
+          cy: this.middleY,
           rxAxisType: type
         }).transform({
           translateX: this.getTimeSpace()
@@ -69,17 +67,23 @@ export class RxAxis extends RxBlockGroup {
 
   private _drawCompleteLine() {
     const x = this.getTimeSpace() + RX_DOT_RADIUS_OUTER;
+
     this.group
       .rect(4, RX_DOT_RADIUS * 2)
       .center(x, this.middleY)
       .front();
+
     const finalLine = this.group
       .rect(RX_DOT_SIZE, this.lineWidth)
       .center(0, this.middleY)
+      .fill(COLORS.finishLineColor)
       .x(x)
       .back();
 
-    this.group.polygon(`0,0 0,10 10,5`).center(finalLine.bbox().x2, this.middleY);
+    this.group
+      .polygon(`0,0 0,10 10,5`)
+      .fill(COLORS.finishLineColor)
+      .center(finalLine.bbox().x2, this.middleY);
   }
 
   private _unsubscribe() {
