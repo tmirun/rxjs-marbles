@@ -18,7 +18,6 @@ export class RxAxis extends RxBlockGroup {
   private color = getRandomColor();
   private timeline: Timeline;
   private readonly startTimeCountAt: number;
-
   private get middleY() {
     return RxAxis.height / 2;
   }
@@ -54,16 +53,11 @@ export class RxAxis extends RxBlockGroup {
         });
 
         if (this.completeNextTime) {
-          this.complete();
+          this._complete();
         }
       },
-      complete: () => this.complete
+      complete: () => this._complete
     });
-  }
-
-  complete() {
-    this._drawCompleteLine();
-    this._unsubscribe();
   }
 
   private _drawCompleteLine() {
@@ -87,8 +81,13 @@ export class RxAxis extends RxBlockGroup {
       .center(finalLine.bbox().x2, this.middleY);
   }
 
+  private _complete() {
+    this._drawCompleteLine();
+    this._unsubscribe();
+  }
+
   public destroy() {
-    this.complete();
+    this._unsubscribe();
   }
 
   private _unsubscribe() {

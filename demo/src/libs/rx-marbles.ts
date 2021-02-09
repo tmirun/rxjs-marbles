@@ -5,7 +5,7 @@ import { RxObservable } from './rx-observable';
 
 export class RxMarbles {
   public timeline = new Timeline();
-  public svg: Svg;
+  public draw: Svg;
   public rxObservables: RxObservable[] = [];
   public padding = 20;
   private currentY = 0;
@@ -13,7 +13,7 @@ export class RxMarbles {
   private subscriptions: Subscription = new Subscription();
 
   constructor(svgElement: string, source$: Observable<any>) {
-    this.svg = SVG().addTo(svgElement).size(0, 0);
+    this.draw = SVG().addTo(svgElement).size(0, 0);
 
     this.timeline.time$.pipe().subscribe(
       () => {
@@ -30,7 +30,7 @@ export class RxMarbles {
   }
 
   subscribe(observable$: Observable<any>) {
-    const observable = new RxObservable(this.svg, observable$, this.timeline, {
+    const observable = new RxObservable(this.draw, observable$, this.timeline, {
       showOperators: this.showOperators
     });
     observable.x = this.timeline.getTimeSpace() + this.padding;
@@ -57,19 +57,18 @@ export class RxMarbles {
       height = Math.max(observablesMarble.group.height() + observablesMarble.y, height);
     });
 
-    this.svg
+    this.draw
       .animate({ duration: this.timeline.period })
       .width(width + this.padding)
       .height(height + this.padding);
   }
 
   destroy() {
-    this.svg.remove();
+    this.draw.remove();
     this.subscriptions.unsubscribe();
     this.timeline.finish();
     this.rxObservables.forEach((rxObservable) => {
       rxObservable.destroy();
     });
-    // TODO
   }
 }
