@@ -4,13 +4,16 @@ import { Observable } from 'rxjs';
 import { Timeline } from './timeline';
 import { RxOperator } from './rx-operator';
 import { RxBlockGroup } from './rx-block-group';
-import { RX_DOT_RADIUS_OUTER } from './rx-dot';
+import { RX_DOT_RADIUS_OUTER } from './dot';
+
+export interface RxObservableOptions {
+  showOperators: boolean;
+}
 
 export class RxObservable extends RxBlockGroup {
   public padding = 20;
 
   public drawElements: RxAxis[] & RxOperator[] = [];
-  public showAllOperatorMarble = false;
   public title: Text;
   public titleHeight = 20;
   public height = 0;
@@ -18,7 +21,12 @@ export class RxObservable extends RxBlockGroup {
   private startTimeCountAt;
   private observables: Observable<any>[];
 
-  constructor(draw: Svg, source$: Observable<any>, timeline: Timeline) {
+  constructor(
+    draw: Svg,
+    source$: Observable<any>,
+    timeline: Timeline,
+    options?: RxObservableOptions
+  ) {
     super(draw, 'observable-marbles');
     this.title = this.group.text('observable$').attr({ 'font-weight': 'bold' });
     this._currentY += this.titleHeight;
@@ -31,14 +39,14 @@ export class RxObservable extends RxBlockGroup {
       }
     });
 
-    if (this.showAllOperatorMarble) {
+    if (options?.showOperators) {
       this.observables = this.getObservableOperators(source$);
     } else {
       this.observables = [source$];
     }
 
     this.observables.forEach((observable: Observable<any>, index) => {
-      if (observable.source && this.showAllOperatorMarble) {
+      if (observable.source && options?.showOperators) {
         const observableOperations = new RxOperator(this.group, observable, timeline);
         observableOperations.xy(0, this._currentY);
         this.drawElements.push(observableOperations);
@@ -89,5 +97,12 @@ export class RxObservable extends RxBlockGroup {
       return 'final';
     }
     return 'middle';
+  }
+
+  public destroy() {
+    this._unsubscribeAll();
+    this.drawElements.forEach((rxAxisOrRxOperator) => {
+      rxAxisOrRxOperator.destroy();
+    });
   }
 }

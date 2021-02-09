@@ -1,16 +1,18 @@
 import { Svg, SVG } from '@svgdotjs/svg.js';
-import { Observable, isObservable } from 'rxjs';
+import { Observable, isObservable, Subject, Subscription, observable } from 'rxjs';
 import { Timeline } from './timeline';
 import { RxObservable } from './rx-observable';
 
 export class RxMarbles {
   public timeline = new Timeline();
   public svg: Svg;
-  public observablesMarbles: RxObservable[] = [];
+  public rxObservables: RxObservable[] = [];
   public padding = 20;
   private currentY = 0;
+  private showOperators = false;
+  private subscriptions: Subscription = new Subscription();
 
-  constructor(svgElement: string) {
+  constructor(svgElement: string, source$: Observable<any>) {
     this.svg = SVG().addTo(svgElement).size(0, 0);
 
     this.timeline.time$.pipe().subscribe(
@@ -23,28 +25,34 @@ export class RxMarbles {
       }
     );
 
+    this.subscribe(source$);
     this.timeline.start();
   }
 
   subscribe(observable$: Observable<any>) {
-    const observableMarble = new RxObservable(this.svg, observable$, this.timeline);
-    observableMarble.x = this.timeline.getTimeSpace() + this.padding;
-    observableMarble.y = this.currentY + this.padding;
-    this.observablesMarbles.push(observableMarble);
-    this.currentY += observableMarble.height;
+    const observable = new RxObservable(this.svg, observable$, this.timeline, {
+      showOperators: this.showOperators
+    });
+    observable.x = this.timeline.getTimeSpace() + this.padding;
+    observable.y = this.currentY + this.padding;
+    this.rxObservables.push(observable);
+    this.currentY += observable.height;
 
     // when detect other subscriber
-    observable$.subscribe((value) => {
+    const subscription = observable$.subscribe((value) => {
       if (isObservable(value)) {
         this.subscribe(value);
       }
     });
+
+    this.subscriptions.add(subscription);
   }
 
   refreshSvgSize() {
     let height = 0;
     let width = 0;
-    this.observablesMarbles.forEach((observablesMarble, index) => {
+    // todo change prefix name rx
+    this.rxObservables.forEach((observablesMarble, index) => {
       width = Math.max(observablesMarble.group.width() + observablesMarble.x, width);
       height = Math.max(observablesMarble.group.height() + observablesMarble.y, height);
     });
@@ -53,5 +61,15 @@ export class RxMarbles {
       .animate({ duration: this.timeline.period })
       .width(width + this.padding)
       .height(height + this.padding);
+  }
+
+  destroy() {
+    this.svg.remove();
+    this.subscriptions.unsubscribe();
+    this.timeline.finish();
+    this.rxObservables.forEach((rxObservable) => {
+      rxObservable.destroy();
+    });
+    // TODO
   }
 }

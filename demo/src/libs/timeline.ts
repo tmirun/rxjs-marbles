@@ -2,12 +2,12 @@ import { interval, Observable, ReplaySubject, Subject } from 'rxjs';
 import { switchMap, takeUntil, tap } from 'rxjs/operators';
 
 export class Timeline {
-  public period = 500; // millisecond
+  public period = 250; // millisecond
   public start$ = new ReplaySubject(1);
   public stop$ = new Subject();
   public time$: Observable<number>;
   public counter = 0;
-  public timeSpace = 2;
+  public timeSpace = 4;
 
   constructor() {
     // ref: https://codepen.io/belfz/pen/WwrBej
@@ -25,7 +25,11 @@ export class Timeline {
     this.stop$.next();
   }
 
-  getTimeSpace() {
-    return this.counter * this.timeSpace;
+  finish() {
+    this.start$.complete();
+  }
+
+  getTimeSpace(offset: number = 0) {
+    return (this.counter - offset) * this.timeSpace;
   }
 }

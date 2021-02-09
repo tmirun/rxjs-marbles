@@ -3,7 +3,7 @@ import { Observable, Subscription } from 'rxjs';
 import { Timeline } from './timeline';
 import { RxBlockGroup } from './rx-block-group';
 import { COLORS, getRandomColor } from './colors';
-import { drawDot, RX_DOT_RADIUS, RX_DOT_RADIUS_OUTER, RX_DOT_SIZE } from './rx-dot';
+import { drawDot, RX_DOT_RADIUS, RX_DOT_RADIUS_OUTER, RX_DOT_SIZE } from './dot';
 
 export type RxAxisType = 'start' | 'final' | 'none' | 'middle';
 
@@ -43,6 +43,7 @@ export class RxAxis extends RxBlockGroup {
     // subscribe to observable
     this.subscription = observable$.subscribe({
       next: (value) => {
+        console.log('draw dot');
         drawDot(this.group, {
           value,
           color: this.color,
@@ -84,6 +85,10 @@ export class RxAxis extends RxBlockGroup {
       .polygon(`0,0 0,10 10,5`)
       .fill(COLORS.finishLineColor)
       .center(finalLine.bbox().x2, this.middleY);
+  }
+
+  public destroy() {
+    this.complete();
   }
 
   private _unsubscribe() {
