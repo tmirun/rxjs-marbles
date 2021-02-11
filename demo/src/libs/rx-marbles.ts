@@ -9,7 +9,7 @@ export class RxMarbles {
   public rxObservables: RxObservable[] = [];
   public padding = 20;
   private currentY = 0;
-  private showOperators = false;
+  private showOperators = true;
   private subscriptions: Subscription = new Subscription();
   private element: HTMLElement;
 
