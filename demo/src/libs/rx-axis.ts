@@ -1,108 +1,75 @@
 import { G, Rect, Svg } from '@svgdotjs/svg.js';
 import { Observable, Subscription } from 'rxjs';
 import { Timeline } from './timeline';
-import { RxBlockGroup } from './rx-block-group';
-import { COLORS, getRandomColor } from './colors';
-import { drawDot, RX_DOT_RADIUS, RX_DOT_RADIUS_OUTER, RX_DOT_SIZE } from './dot';
+import { RxDrawer } from './rx-drawer';
+import { getRandomColor } from './colors';
+import { drawDot } from './dot';
+import { drawCompleteLine } from './complete-line';
 
 export type RxAxisType = 'start' | 'final' | 'none' | 'middle';
 
-export class RxAxis extends RxBlockGroup {
+export class RxAxis extends RxDrawer {
   public static height = 60;
-  private axis: Rect;
-
   public lineWidth = 2;
-  public subscription: Subscription | undefined;
-  public timelineSubscription: Subscription | undefined;
-  public completeNextTime = false;
-  private color = getRandomColor();
-  private timeline: Timeline;
-  private readonly startTimeCountAt: number;
-  private get middleY() {
+  public subscriptions = new Subscription();
+
+  private _axis: Rect;
+  private _color = getRandomColor();
+  private _timeline: Timeline;
+  private _type: RxAxisType = 'none';
+  private readonly _startTimeXAt: number;
+  private _source: Observable<any>;
+  private get cy() {
     return RxAxis.height / 2;
   }
 
   constructor(
     draw: Svg | G,
-    observable$: Observable<any>,
+    source$: Observable<any>,
     timeline: Timeline,
     type: RxAxisType = 'none'
   ) {
     super(draw, 'observable-line');
-    this.timeline = timeline;
-    this.axis = this.group.rect(0, this.lineWidth).center(0, this.middleY);
-    this.startTimeCountAt = timeline.counter;
+    this._timeline = timeline;
+    this._type = type;
+    this._source = source$;
+    this._startTimeXAt = timeline.counter;
 
-    this.timelineSubscription = timeline.time$.subscribe(() => {
-      this.axis
-        // .animate({ duration: this.timeline.period, ease: 'linear' })
-        .width(this.getTimeSpace());
+    // draw line
+    this._axis = this.group.rect(0, this.lineWidth).center(0, this.cy);
+
+    const timelineSubscription = timeline.time$.subscribe({
+      next: () => this._axis.width(this.getCurrentX()),
+      complete: this._complete
     });
+    this.subscriptions.add(timelineSubscription);
 
     // subscribe to observable
-    this.subscription = observable$.subscribe({
+    const sourceSubscription = source$.subscribe({
       next: (value) => {
-        console.log('draw dot');
         drawDot(this.group, {
           value,
-          color: this.color,
-          cy: this.middleY,
-          rxAxisType: type
-        }).transform({
-          translateX: this.getTimeSpace()
+          color: this._color,
+          cy: this.cy,
+          rxAxisType: type,
+          cx: this.getCurrentX()
         });
-
-        if (this.completeNextTime) {
-          this._complete();
-        }
       },
       complete: () => this._complete
     });
-  }
-
-  private _drawCompleteLine() {
-    const x = this.getTimeSpace() + RX_DOT_RADIUS_OUTER;
-
-    this.group
-      .rect(4, RX_DOT_RADIUS * 2)
-      .center(x, this.middleY)
-      .front();
-
-    const finalLine = this.group
-      .rect(RX_DOT_SIZE, this.lineWidth)
-      .center(0, this.middleY)
-      .fill(COLORS.finishLineColor)
-      .x(x)
-      .back();
-
-    this.group
-      .polygon(`0,0 0,10 10,5`)
-      .fill(COLORS.finishLineColor)
-      .center(finalLine.bbox().x2, this.middleY);
-  }
-
-  private _complete() {
-    this._drawCompleteLine();
-    this._unsubscribe();
+    this.subscriptions.add(sourceSubscription);
   }
 
   public destroy() {
-    this._unsubscribe();
+    this.subscriptions.unsubscribe();
   }
 
-  private _unsubscribe() {
-    if (this.subscription) {
-      this.subscription.unsubscribe();
-      this.subscription = undefined;
-    }
-
-    if (this.timelineSubscription) {
-      this.timelineSubscription.unsubscribe();
-      this.timelineSubscription = undefined;
-    }
+  private _complete() {
+    drawCompleteLine(this.group, this.getCurrentX(), this.cy);
+    this.subscriptions.unsubscribe();
   }
 
-  private getTimeSpace() {
-    return this.timeline.getTimeSpace(this.startTimeCountAt);
+  private getCurrentX() {
+    return this._timeline.getTimeSpace(this._startTimeXAt);
   }
 }

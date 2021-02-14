@@ -1,6 +1,6 @@
 import { G, Svg } from '@svgdotjs/svg.js';
 
-export class RxBlockGroup {
+export abstract class RxDrawer {
   public group: G;
   protected padding: number = 0;
   get paddingX2() {
@@ -36,4 +36,6 @@ export class RxBlockGroup {
     this._x = x;
     this.group.transform({ translateX: this._x, translateY: this._y });
   }
+
+  abstract destroy(): void;
 }
