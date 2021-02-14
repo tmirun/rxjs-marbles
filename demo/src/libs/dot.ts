@@ -3,6 +3,7 @@ import tippy from 'tippy.js';
 import { RxAxisType } from './rx-axis';
 import 'tippy.js/dist/tippy.css';
 import { isObservable } from 'rxjs';
+import { COLORS } from './colors';
 
 interface Options {
   value: any;
@@ -20,16 +21,17 @@ export const RX_DOT_RADIUS_OUTER = RX_DOT_RADIUS + RX_DOT_STROKE;
 export function drawDot(draw: Svg | G, { value, cx, cy, color }: Options) {
   let label = '';
 
-  const dot = draw.group();
+  const dot = draw.group().addClass('rx-dot');
 
   if (isObservable(value)) {
     dot
       .circle()
       .center(0, 0)
-      .fill('rgba(255,255,255, 0.5)')
+      .fill(COLORS.dotGrey)
+      .opacity(0.8)
       .animate()
       .size(RX_DOT_SIZE, RX_DOT_SIZE);
-    label = 'new observable';
+    label = 'create new observable';
   } else {
     label = value.toString();
     const text = label.length > 3 ? '...' : label;
