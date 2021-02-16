@@ -1,6 +1,5 @@
 import { G, Svg } from '@svgdotjs/svg.js';
 import tippy from 'tippy.js';
-import { RxAxisType } from './rx-axis';
 import 'tippy.js/dist/tippy.css';
 import { isObservable } from 'rxjs';
 import { COLORS } from './colors';
@@ -10,7 +9,6 @@ interface Options {
   cy: number;
   cx: number;
   color: string;
-  rxAxisType: RxAxisType;
 }
 
 export const RX_DOT_SIZE = 30;
@@ -18,7 +16,7 @@ export const RX_DOT_RADIUS = RX_DOT_SIZE / 2;
 export const RX_DOT_STROKE = 4;
 export const RX_DOT_RADIUS_OUTER = RX_DOT_RADIUS + RX_DOT_STROKE;
 
-export function drawDot(draw: Svg | G, { value, cx, cy, color }: Options) {
+export function dot(draw: Svg | G, { value, cx, cy, color }: Options) {
   let label = '';
 
   const dot = draw.group().addClass('rx-dot');
