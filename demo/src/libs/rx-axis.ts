@@ -3,7 +3,7 @@ import { Observable, Subscription } from 'rxjs';
 import { Timeline } from './timeline';
 import { RxDrawer } from './rx-drawer';
 import { getRandomColor } from './colors';
-import { drawDot } from './dot';
+import { dot } from './dot';
 import { drawCompleteLine } from './complete-line';
 
 export type RxAxisType = 'start' | 'final' | 'none' | 'middle';
@@ -39,23 +39,24 @@ export class RxAxis extends RxDrawer {
     this._axis = this.group.rect(0, this.lineWidth).center(0, this.cy);
 
     const timelineSubscription = timeline.time$.subscribe({
-      next: () => this._axis.width(this.getCurrentX()),
-      complete: this._complete
+      next: () => {
+        this._axis.animate(this._timeline.period, '=').width(this.getCurrentX(-1)); // it is 1 step behind than dot
+      },
+      complete: () => this._complete()
     });
     this.subscriptions.add(timelineSubscription);
 
     // subscribe to observable
     const sourceSubscription = source$.subscribe({
       next: (value) => {
-        drawDot(this.group, {
+        dot(this.group, {
           value,
           color: this._color,
           cy: this.cy,
-          rxAxisType: type,
           cx: this.getCurrentX()
         });
       },
-      complete: () => this._complete
+      complete: () => this._complete()
     });
     this.subscriptions.add(sourceSubscription);
   }
@@ -69,7 +70,7 @@ export class RxAxis extends RxDrawer {
     this.subscriptions.unsubscribe();
   }
 
-  private getCurrentX() {
-    return this._timeline.getTimeSpace(this._startTimeXAt);
+  private getCurrentX(offset = 0) {
+    return this._timeline.getTimeSpace(this._startTimeXAt + offset);
   }
 }
