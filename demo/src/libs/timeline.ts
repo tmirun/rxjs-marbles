@@ -1,33 +1,27 @@
-import { interval, Observable, ReplaySubject, Subject } from 'rxjs';
-import { share, switchMap, takeUntil, tap } from 'rxjs/operators';
+import { Subject } from 'rxjs';
 
 export class Timeline {
-  public period = 1000; // millisecond
-  public start$ = new ReplaySubject(1);
-  public stop$ = new Subject();
-  public time$: Observable<number>;
+  public period = 250; // millisecond
+  public time$ = new Subject<number>();
   public counter = 0;
   public timeSpace = 10;
-
-  constructor() {
-    // ref: https://codepen.io/belfz/pen/WwrBej
-    this.time$ = this.start$.pipe(
-      switchMap(() => interval(this.period).pipe(takeUntil(this.stop$))),
-      tap(() => this.counter++),
-      share()
-    );
-  }
+  public intervalId?: any;
 
   start() {
-    this.start$.next();
+    this.intervalId = setInterval(() => {
+      this.time$.next(this.counter);
+      this.counter++;
+    }, this.period);
   }
 
   stop() {
-    this.stop$.next();
+    if (this.intervalId) {
+      clearInterval();
+    }
   }
 
   finish() {
-    this.start$.complete();
+    this.time$.complete();
   }
 
   getTimeSpace(offset: number = 0) {
