@@ -16,7 +16,8 @@ export class Timeline {
 
   stop() {
     if (this.intervalId) {
-      clearInterval();
+      clearInterval(this.intervalId);
+      this.intervalId = undefined;
     }
   }
 
