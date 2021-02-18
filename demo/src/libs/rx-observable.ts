@@ -1,20 +1,20 @@
 import { RxAxis, RxAxisType } from './rx-axis';
-import { Svg, Text } from '@svgdotjs/svg.js';
+import { Svg } from '@svgdotjs/svg.js';
 import { Observable } from 'rxjs';
 import { Timeline } from './timeline';
 import { RxOperator } from './rx-operator';
-import { RxBlockGroup } from './rx-block-group';
+import { RxDrawer } from './rx-drawer';
 import { RX_DOT_RADIUS_OUTER } from './dot';
+import { delay, last, takeUntil } from 'rxjs/operators';
 
 export interface RxObservableOptions {
   showOperators: boolean;
 }
 
-export class RxObservable extends RxBlockGroup {
+export class RxObservable extends RxDrawer {
   public padding = 20;
 
   public drawElements: RxAxis[] & RxOperator[] = [];
-  public title: Text;
   public titleHeight = 20;
   public height = 0;
   private _currentY = 0;
@@ -28,26 +28,22 @@ export class RxObservable extends RxBlockGroup {
     options?: RxObservableOptions
   ) {
     super(draw, 'observable-marbles');
-    this.title = this.group.text('observable$').attr({ 'font-weight': 'bold' });
     this._currentY += this.titleHeight;
     this.height += this.titleHeight;
     this.startTimeCountAt = timeline.counter;
 
-    source$.subscribe({
-      complete: () => {
-        this._unsubscribeAll();
-      }
-    });
+    if (options) options.showOperators = true;
 
-    if (options?.showOperators) {
+    // if (options?.showOperators) {
+    if (true) {
       this.observables = this.getObservableOperators(source$);
     } else {
       this.observables = [source$];
     }
 
-    this.observables.forEach((observable: Observable<any>, index) => {
-      if (observable.source && options?.showOperators) {
-        const observableOperations = new RxOperator(this.group, observable, timeline);
+    this.observables.forEach((observable$: Observable<any>, index) => {
+      if (observable$.source && options?.showOperators) {
+        const observableOperations = new RxOperator(this.group, observable$, timeline);
         observableOperations.xy(0, this._currentY);
         this.drawElements.push(observableOperations);
 
@@ -57,7 +53,7 @@ export class RxObservable extends RxBlockGroup {
 
       const observableLine = new RxAxis(
         this.group,
-        observable,
+        observable$,
         timeline,
         this._getRxAxisType(index)
       );
@@ -69,20 +65,45 @@ export class RxObservable extends RxBlockGroup {
     });
   }
 
+  /**
+   * @param observable$: observable
+   * @param observables: accomulator
+   * @param source$: this is the origin observable
+   * @description: this function return all operators observable
+   * ----A-----A-----A->
+   *     MAP OPERATOR
+   * ----B-----B-----B->
+   */
   getObservableOperators(
     observable$: Observable<any>,
-    observables: Observable<any>[] = []
+    observables: Observable<any>[] = [],
+    source$?: Observable<any>
   ): Observable<any>[] {
-    observables.unshift(observable$);
+    let newObservable$ = observable$;
+
+    if (!source$) {
+      source$ = observable$;
+    }
+
+    /**
+     * when stop origin obserbale  should stop all operators observable
+     * ----A-----A-----A----|>
+     * ----B-----B-----B----|>
+     */
+    if (observables.length) {
+      newObservable$ = observable$.pipe(takeUntil(source$.pipe(last(), delay(0))));
+    }
+
+    observables.unshift(newObservable$);
     if (observable$.source) {
-      this.getObservableOperators(observable$.source, observables);
+      this.getObservableOperators(observable$.source, observables, source$);
     }
     return observables;
   }
 
-  private _unsubscribeAll() {
+  public destroy() {
     this.drawElements.forEach((observableLine) => {
-      observableLine.completeNextTime = true;
+      observableLine.destroy();
     });
   }
 
@@ -97,12 +118,5 @@ export class RxObservable extends RxBlockGroup {
       return 'final';
     }
     return 'middle';
-  }
-
-  public destroy() {
-    this._unsubscribeAll();
-    this.drawElements.forEach((rxAxisOrRxOperator) => {
-      rxAxisOrRxOperator.destroy();
-    });
   }
 }
