@@ -4,15 +4,14 @@ import { Observable } from 'rxjs';
 import { Timeline } from './timeline';
 import { RxOperator } from './rx-operator';
 import { RxDrawer } from './rx-drawer';
-import { RX_DOT_RADIUS_OUTER } from './dot';
 import { delay, last, takeUntil } from 'rxjs/operators';
 
 export interface RxObservableOptions {
-  showOperators: boolean;
+  showOperators?: boolean;
 }
 
 export class RxObservable extends RxDrawer {
-  public padding = 20;
+  public padding = 24;
 
   public drawElements: RxAxis[] & RxOperator[] = [];
   public titleHeight = 20;
@@ -25,17 +24,19 @@ export class RxObservable extends RxDrawer {
     draw: Svg,
     source$: Observable<any>,
     timeline: Timeline,
-    options?: RxObservableOptions
+    options: RxObservableOptions = {}
   ) {
     super(draw, 'observable-marbles');
     this._currentY += this.titleHeight;
     this.height += this.titleHeight;
     this.startTimeCountAt = timeline.counter;
 
-    if (options) options.showOperators = true;
+    // temporal
+    if (options) {
+      options.showOperators = true;
+    }
 
-    // if (options?.showOperators) {
-    if (true) {
+    if (options?.showOperators) {
       this.observables = this.getObservableOperators(source$);
     } else {
       this.observables = [source$];
@@ -43,25 +44,30 @@ export class RxObservable extends RxDrawer {
 
     this.observables.forEach((observable$: Observable<any>, index) => {
       if (observable$.source && options?.showOperators) {
-        const observableOperations = new RxOperator(this.group, observable$, timeline);
-        observableOperations.xy(0, this._currentY);
-        this.drawElements.push(observableOperations);
+        const rxOperator = new RxOperator(this.group, observable$, timeline);
+        rxOperator.xy(0, this._currentY);
+        this.drawElements.push(rxOperator);
 
         this._currentY += RxOperator.height;
         this.height += RxOperator.height;
       }
 
-      const observableLine = new RxAxis(
-        this.group,
-        observable$,
-        timeline,
-        this._getRxAxisType(index)
-      );
-      observableLine.xy(RX_DOT_RADIUS_OUTER, this._currentY);
+      let newObservable$ = observable$;
+      /**
+       * when stop origin obserbale  should stop all operators observable
+       * ----A-----A-----A----|>
+       * ----B-----B-----B----|>
+       */
+      if (this.observables.length > 1) {
+        newObservable$ = observable$.pipe(takeUntil(source$.pipe(last(), delay(0))));
+      }
+
+      const rxAxis = new RxAxis(this.group, newObservable$, timeline, this._getRxAxisType(index));
+      rxAxis.xy(this.padding, this._currentY);
       this._currentY += RxAxis.height;
       this.height += RxAxis.height;
 
-      this.drawElements.push(observableLine);
+      this.drawElements.push(rxAxis);
     });
   }
 
@@ -79,22 +85,11 @@ export class RxObservable extends RxDrawer {
     observables: Observable<any>[] = [],
     source$?: Observable<any>
   ): Observable<any>[] {
-    let newObservable$ = observable$;
-
     if (!source$) {
       source$ = observable$;
     }
 
-    /**
-     * when stop origin obserbale  should stop all operators observable
-     * ----A-----A-----A----|>
-     * ----B-----B-----B----|>
-     */
-    if (observables.length) {
-      newObservable$ = observable$.pipe(takeUntil(source$.pipe(last(), delay(0))));
-    }
-
-    observables.unshift(newObservable$);
+    observables.unshift(observable$);
     if (observable$.source) {
       this.getObservableOperators(observable$.source, observables, source$);
     }
