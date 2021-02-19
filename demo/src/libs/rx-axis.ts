@@ -52,14 +52,13 @@ export class RxAxis extends RxDrawer {
     const sourceSubscription = source$.subscribe({
       next: (value) => {
         const x = this.getCurrentX();
+        this._drawDashLine(x);
         dot(this.group, {
           value,
           color: this._color,
           cy: this.cy,
           cx: x
         });
-
-        this._drawDashLine(x);
       },
       complete: () => this._complete()
     });
