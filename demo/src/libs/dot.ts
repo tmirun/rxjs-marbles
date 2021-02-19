@@ -36,7 +36,7 @@ export function dot(draw: Svg | G, { value, cx, cy, color }: Options) {
     dot
       .circle(0)
       .center(0, 0)
-      .fill('rgba(255, 255, 255, 0.8)')
+      .fill('rgba(255, 255, 255, 0.9)')
       .stroke({ color: color, width: RX_DOT_STROKE })
       .animate()
       .size(RX_DOT_SIZE, RX_DOT_SIZE);

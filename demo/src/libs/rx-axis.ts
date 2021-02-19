@@ -5,6 +5,8 @@ import { RxDrawer } from './rx-drawer';
 import { getRandomColor } from './colors';
 import { dot } from './dot';
 import { drawCompleteLine } from './complete-line';
+import { dashLine } from './dash-line';
+import { yellow } from '@ant-design/colors';
 
 export type RxAxisType = 'start' | 'final' | 'none' | 'middle';
 
@@ -49,12 +51,15 @@ export class RxAxis extends RxDrawer {
     // subscribe to observable
     const sourceSubscription = source$.subscribe({
       next: (value) => {
+        const x = this.getCurrentX();
         dot(this.group, {
           value,
           color: this._color,
           cy: this.cy,
-          cx: this.getCurrentX()
+          cx: x
         });
+
+        this._drawDashLine(x);
       },
       complete: () => this._complete()
     });
@@ -68,6 +73,31 @@ export class RxAxis extends RxDrawer {
   private _complete() {
     drawCompleteLine(this.group, this.getCurrentX(), this.cy);
     this.subscriptions.unsubscribe();
+  }
+
+  private _drawDashLine(x: number) {
+    if (this._type === 'start') {
+      dashLine(this.group, {
+        x: x,
+        y1: this.cy,
+        y2: RxAxis.height
+      });
+    }
+
+    if (this._type === 'middle') {
+      dashLine(this.group, {
+        x: x,
+        y1: 0,
+        y2: RxAxis.height
+      });
+    }
+    if (this._type === 'final') {
+      dashLine(this.group, {
+        x: x,
+        y1: 0,
+        y2: this.cy
+      });
+    }
   }
 
   private getCurrentX(offset = 0) {

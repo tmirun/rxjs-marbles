@@ -7,6 +7,7 @@ export const colors = Object.values(presetPalettes).map((colors) => {
 export const getRandomColor = () => colors[Math.floor(Math.random() * colors.length)];
 
 export const COLORS = {
-  finishLineColor: presetPalettes.grey[1],
+  finishLine: presetPalettes.grey[1],
+  dashLine: presetPalettes.grey[2],
   dotGrey: presetPalettes.grey[0]
 };
