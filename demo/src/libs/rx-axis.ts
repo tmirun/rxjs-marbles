@@ -1,12 +1,12 @@
 import { G, Rect, Svg } from '@svgdotjs/svg.js';
-import { Observable, Subscription } from 'rxjs';
+import { isObservable, Observable, Subscription } from 'rxjs';
 import { Timeline } from './timeline';
-import { RxDrawer } from './rx-drawer';
+import { RxDrawer, RxDrawerOptions } from './rx-drawer';
 import { getRandomColor } from './colors';
 import { dot } from './dot';
 import { drawCompleteLine } from './complete-line';
 import { dashLine } from './dash-line';
-import { yellow } from '@ant-design/colors';
+import { throwFromEvent } from './rx-event';
 
 export type RxAxisType = 'start' | 'final' | 'none' | 'middle';
 
@@ -29,9 +29,10 @@ export class RxAxis extends RxDrawer {
     draw: Svg | G,
     source$: Observable<any>,
     timeline: Timeline,
-    type: RxAxisType = 'none'
+    type: RxAxisType = 'none',
+    options?: RxDrawerOptions
   ) {
-    super(draw, 'observable-line');
+    super(draw, 'observable-line', options);
     this._timeline = timeline;
     this._type = type;
     this._source = source$;
@@ -59,6 +60,11 @@ export class RxAxis extends RxDrawer {
           cy: this.cy,
           cx: x
         });
+
+        // this is draw dash line
+        if (isObservable(value)) {
+          throwFromEvent(this.y + this.cy);
+        }
       },
       complete: () => this._complete()
     });

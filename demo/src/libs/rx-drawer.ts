@@ -1,5 +1,10 @@
 import { G, Svg } from '@svgdotjs/svg.js';
 
+export interface RxDrawerOptions {
+  x?: number;
+  y?: number;
+}
+
 export abstract class RxDrawer {
   public group: G;
   protected padding: number = 0;
@@ -7,8 +12,20 @@ export abstract class RxDrawer {
     return this.padding * 2;
   }
 
-  constructor(draw: Svg | G, className: string) {
+  /**
+   * @param draw: SVG or G element
+   * @param className:
+   * @param options: x and y option
+   * @protected
+   */
+  protected constructor(draw: Svg | G, className: string, options?: RxDrawerOptions) {
     this.group = draw.group().addClass(className);
+    if (options?.x) {
+      this.x = options.x;
+    }
+    if (options?.y) {
+      this.y = options.y;
+    }
   }
 
   private _x = 0;

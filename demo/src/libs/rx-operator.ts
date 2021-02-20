@@ -1,6 +1,6 @@
 import { G, Rect, Svg, Text } from '@svgdotjs/svg.js';
 import { Observable, Subscription } from 'rxjs';
-import { RxDrawer } from './rx-drawer';
+import { RxDrawer, RxDrawerOptions } from './rx-drawer';
 import { Timeline } from './timeline';
 import { delay, last, takeUntil } from 'rxjs/operators';
 
@@ -23,14 +23,16 @@ export class RxOperator extends RxDrawer {
    * @param observable$: this is operator observable
    * @param source$: this is the observable original
    * @param timeline
+   * @param options
    */
   constructor(
     draw: Svg | G,
     observable$: Observable<any>,
     source$: Observable<any>,
-    timeline: Timeline
+    timeline: Timeline,
+    options?: RxDrawerOptions
   ) {
-    super(draw, 'observable-operator');
+    super(draw, 'observable-operator', options);
 
     const description = this._getOperatorDescription(observable$);
     this._text = this.group.text(description);
