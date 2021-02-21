@@ -1,14 +1,22 @@
 {
-  "name": "rxjs-marbles",
-  "version": "1.0.0",
+  "name": "rxjs-marbles-animation",
+  "version": "0.1.0",
   "description": "",
-  "main": "index.js",
+  "main": "build/rx-marbles.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc"
   },
-  "author": "",
+  "author": "tmirun",
   "license": "ISC",
   "devDependencies": {
+    "prettier": "2.2.1",
     "typescript": "^4.1.3"
+  },
+  "dependencies": {
+    "@ant-design/colors": "^5.0.1",
+    "@svgdotjs/svg.js": "^3.0.16",
+    "rxjs": "^6.6.3",
+    "tippy.js": "^6.2.7"
   }
 }
