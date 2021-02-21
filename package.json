@@ -7,7 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc"
   },
-  "author": "",
+  "author": "tmirun",
   "license": "ISC",
   "devDependencies": {
     "prettier": "2.2.1",
