@@ -71,7 +71,6 @@ export class RxMarbles {
     // todo change prefix name rx
     this.rxObservables.forEach((observablesMarble, index) => {
       width = Math.max(observablesMarble.group.width() + observablesMarble.x, width);
-      // height = Math.max(observablesMarble.group.height() + observablesMarble.y, height);
       height += observablesMarble.height;
     });
 
