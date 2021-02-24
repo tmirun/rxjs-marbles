@@ -1,5 +1,5 @@
 import { RxAxis, RxAxisType } from './rx-axis';
-import { Svg } from '@svgdotjs/svg.js';
+import type { Svg } from '@svgdotjs/svg.js';
 import { Observable } from 'rxjs';
 import { Timeline } from './timeline';
 import { RxOperator } from './rx-operator';
