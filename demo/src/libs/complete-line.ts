@@ -1,6 +1,6 @@
 import { RX_DOT_SIZE } from './dot';
 import { COLORS } from './colors';
-import { G, Svg } from '@svgdotjs/svg.js';
+import type { G, Svg } from '@svgdotjs/svg.js';
 
 const RX_COMPLETE_LINE_HEIGHT = RX_DOT_SIZE + 10;
 const RX_COMPLETE_LINE_LINE_WIDTH = 2;

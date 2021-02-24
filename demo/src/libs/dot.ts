@@ -1,4 +1,4 @@
-import { G, Svg } from '@svgdotjs/svg.js';
+import type { G, Svg } from '@svgdotjs/svg.js';
 import tippy from 'tippy.js';
 import 'tippy.js/dist/tippy.css';
 import { isObservable } from 'rxjs';
