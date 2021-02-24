@@ -1,4 +1,4 @@
-import { G, Rect, Svg, Text } from '@svgdotjs/svg.js';
+import type { G, Rect, Svg, Text } from '@svgdotjs/svg.js';
 import { Observable, Subscription } from 'rxjs';
 import { RxDrawer, RxDrawerOptions } from './rx-drawer';
 import { Timeline } from './timeline';

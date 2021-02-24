@@ -1,4 +1,4 @@
-import { G, Svg } from '@svgdotjs/svg.js';
+import type { G, Svg } from '@svgdotjs/svg.js';
 import { COLORS } from './colors';
 
 interface Options {

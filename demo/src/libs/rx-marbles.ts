@@ -1,10 +1,12 @@
-import { Svg, SVG } from '@svgdotjs/svg.js';
+import type { Svg } from '@svgdotjs/svg.js';
 import { isObservable, Observable, Subscription } from 'rxjs';
 import { Timeline } from './timeline';
 import { RX_OBSERVABLE_PADDING, RxObservable } from './rx-observable';
 import { dashLine } from './dash-line';
 import { RxAxis } from './rx-axis';
 import { RX_EVENT_FROM_Y } from './rx-event';
+// @ts-ignore
+import SVG from '@svgdotjs/svg.js/src/svg.js';
 
 export class RxMarbles {
   private element: HTMLElement;
